@@ -1,6 +1,6 @@
-# webhook-relay
+# E-commerce Webhook Relay
 
-[![CI](https://github.com/bahriy-dev/webhook-relay/actions/workflows/ci.yml/badge.svg)](https://github.com/bahriy-dev/webhook-relay/actions/workflows/ci.yml)
+[![CI](https://github.com/bahriy-dev/ecommerce-webhook-relay/actions/workflows/ci.yml/badge.svg)](https://github.com/bahriy-dev/ecommerce-webhook-relay/actions/workflows/ci.yml)
 ![Node](https://img.shields.io/badge/node-%E2%89%A522.18-339933?logo=nodedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-outbox-003B57?logo=sqlite&logoColor=white)
@@ -36,8 +36,8 @@ in milliseconds with `202 Accepted` and takes over delivery.
 ## Quick start
 
 ```bash
-git clone https://github.com/bahriy-dev/webhook-relay.git
-cd webhook-relay
+git clone https://github.com/bahriy-dev/ecommerce-webhook-relay.git
+cd ecommerce-webhook-relay
 cp sources.example.json sources.json      # set your secrets and target URLs
 ADMIN_TOKEN=change-me SIGNING_SECRET=change-me-too npm start
 npm test                                  # 14 tests
