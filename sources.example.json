@@ -1,0 +1,6 @@
+{
+  "shop": {
+    "secret": "replace-with-the-secret-your-shop-signs-with",
+    "targets": ["https://erp.example.com/webhooks/orders", "https://crm.example.com/hooks"]
+  }
+}
