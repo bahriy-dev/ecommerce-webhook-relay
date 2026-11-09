@@ -31,6 +31,8 @@ in milliseconds with `202 Accepted` and takes over delivery.
 - **Durable outbox.** Every (event, target) pair is a SQLite row, so a restart loses nothing.
 - **Smart retries.** Exponential backoff with jitter; network errors, `5xx`, `408` and `429` are
   retried, other `4xx` go straight to the dead-letter queue.
+- **Event routing.** Each target can subscribe to specific event types (`order.paid`, `stock.*`),
+  so the warehouse only gets stock events and accounting only gets payments.
 - **Operations.** Admin API to list deliveries, inspect errors, replay dead ones and see stats.
 
 ## Quick start
@@ -40,7 +42,7 @@ git clone https://github.com/bahriy-dev/webhook-relay.git
 cd webhook-relay
 cp sources.example.json sources.json      # set your secrets and target URLs
 ADMIN_TOKEN=change-me SIGNING_SECRET=change-me-too npm start
-npm test                                  # 14 tests
+npm test                                  # 20 tests
 ```
 
 Send a test event:
@@ -50,8 +52,30 @@ BODY='{"id":"ord_1001","type":"order.created","total":249900}'
 TS=$(date +%s)
 SIG=$(printf '%s' "$TS.$BODY" | openssl dgst -sha256 -hmac "$SHOP_SECRET" -hex | cut -d' ' -f2)
 curl -X POST localhost:3000/hooks/shop -H "X-Signature: t=$TS,v1=$SIG" -d "$BODY"
-# {"eventId":"ord_1001","queued":2,"duplicate":false}
+# {"eventId":"ord_1001","eventType":"order.created","targets":1,"queued":1,"duplicate":false}
 ```
+
+## Routing events to targets
+
+`sources.json` lists where each source's events go. A plain URL receives everything; an object
+with `events` receives only matching types. Patterns are exact (`order.paid`) or a prefix
+(`stock.*`); `*` matches all.
+
+```json
+{
+  "shop": {
+    "secret": "…",
+    "targets": [
+      "https://erp.example.com/webhooks/orders",
+      { "url": "https://wms.example.com/hooks", "events": ["order.paid", "order.cancelled", "stock.*"] },
+      { "url": "https://accounting.example.com/hooks", "events": ["order.paid", "refund.*"] }
+    ]
+  }
+}
+```
+
+The event type comes from the `X-Event-Type` header, or the payload's `type` / `event` field.
+Events without a type only go to unfiltered targets.
 
 ## API
 
@@ -87,6 +111,7 @@ Every outgoing request carries `X-Event-Id`, `X-Event-Source`, `X-Delivery-Attem
 ```
 src/
   signature.ts   HMAC signing and verification with replay protection
+  routing.ts     per-target event filters (order.paid, stock.*)
   store.ts       SQLite outbox: enqueue, due, mark delivered/failed, replay, stats
   worker.ts      delivery loop, retry classification, exponential backoff
   app.ts         inbound webhook endpoint and admin API

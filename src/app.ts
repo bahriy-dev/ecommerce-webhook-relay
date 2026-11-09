@@ -2,12 +2,13 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { timingSafeEqual, createHash } from 'node:crypto';
 import { verify } from './signature.ts';
 import type { Store, DeliveryStatus } from './store.ts';
+import { routeEvent, eventTypeOf, type TargetConfig } from './routing.ts';
 
 export interface SourceConfig {
   /** Shared secret the sender signs its webhooks with. */
   secret: string;
-  /** URLs every event from this source is forwarded to. */
-  targets: string[];
+  /** Where events from this source go: a URL, or { url, events: ["order.*"] } to filter by event type. */
+  targets: TargetConfig[];
 }
 
 export interface AppConfig {
@@ -43,9 +44,11 @@ export function createApp(store: Store, config: AppConfig) {
         const eventId = header(req, 'x-event-id') ?? (typeof bodyId === 'string' || typeof bodyId === 'number' ? String(bodyId) : null)
           ?? createHash('sha256').update(raw).digest('hex');
 
-        const queued = store.enqueue(second, eventId, raw, source.targets);
+        const eventType = eventTypeOf(header(req, 'x-event-type'), payload);
+        const targets = routeEvent(source.targets, eventType);
+        const queued = store.enqueue(second, eventId, raw, targets);
         // Senders retry on non-2xx, so a duplicate is still a success for them.
-        return send(res, 202, { eventId, queued, duplicate: queued === 0 });
+        return send(res, 202, { eventId, eventType, targets: targets.length, queued, duplicate: targets.length > 0 && queued === 0 });
       }
 
       // ---------- Admin API ----------
