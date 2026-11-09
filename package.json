@@ -1,0 +1,15 @@
+{
+  "name": "webhook-relay",
+  "version": "1.0.0",
+  "description": "Reliable webhook relay for e-commerce events: HMAC signature verification, de-duplication, fan-out, retries with exponential backoff, dead-letter queue and replay. Zero dependencies, Node.js + SQLite.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Bahri YILMAZ (https://bahriyilmaz.dev)",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.ts",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.ts",
+    "typecheck": "npx -y -p typescript@5.9 tsc --noEmit"
+  },
+  "keywords": ["webhook", "webhooks", "hmac", "retry", "outbox", "dead-letter-queue", "e-commerce", "integration", "sqlite", "zero-dependency"]
+}
