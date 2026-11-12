@@ -1,6 +1,10 @@
 {
   "shop": {
     "secret": "replace-with-the-secret-your-shop-signs-with",
-    "targets": ["https://erp.example.com/webhooks/orders", "https://crm.example.com/hooks"]
+    "targets": [
+      "https://erp.example.com/webhooks/orders",
+      { "url": "https://wms.example.com/hooks", "events": ["order.paid", "order.cancelled", "stock.*"] },
+      { "url": "https://accounting.example.com/hooks", "events": ["order.paid", "refund.*"] }
+    ]
   }
 }
