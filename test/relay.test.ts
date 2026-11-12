@@ -105,7 +105,7 @@ describe('HTTP API', () => {
   it('accepts a signed event and fans it out to every target', async () => {
     const res = await deliver('{"id":"ord_1","type":"order.created"}');
     assert.equal(res.status, 202);
-    assert.deepEqual(await res.json(), { eventId: 'ord_1', queued: 2, duplicate: false });
+    assert.deepEqual(await res.json(), { eventId: 'ord_1', eventType: 'order.created', targets: 2, queued: 2, duplicate: false });
   });
 
   it('de-duplicates repeated events', async () => {
