@@ -28,16 +28,20 @@ describe('routeEvent', () => {
   it('sends untyped events only to unfiltered targets', () => {
     assert.deepEqual(routeEvent(targets, null), ['https://erp/hooks', 'https://all/hooks']);
   });
+  it('treats an empty event list as no subscription', () => {
+    const paused = [{ url: 'https://paused/hooks', events: [] }, 'https://erp/hooks'];
+    assert.deepEqual(routeEvent(paused, 'order.paid'), ['https://erp/hooks']);
+    assert.deepEqual(routeEvent(paused, null), ['https://erp/hooks']);
+  });
   it('removes duplicate URLs', () => {
     assert.deepEqual(routeEvent(['https://a', { url: 'https://a', events: ['*'] }], 'x'), ['https://a']);
   });
 });
 
 describe('eventTypeOf', () => {
-  it('prefers the header, then type, then event', () => {
-    assert.equal(eventTypeOf('order.paid', { type: 'x' }), 'order.paid');
-    assert.equal(eventTypeOf(undefined, { type: 'order.created' }), 'order.created');
-    assert.equal(eventTypeOf(undefined, { event: 'refund.created' }), 'refund.created');
-    assert.equal(eventTypeOf(undefined, { id: 1 }), null);
+  it('reads the signed body: type, then event', () => {
+    assert.equal(eventTypeOf({ type: 'order.created' }), 'order.created');
+    assert.equal(eventTypeOf({ event: 'refund.created' }), 'refund.created');
+    assert.equal(eventTypeOf({ id: 1 }), null);
   });
 });

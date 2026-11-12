@@ -44,7 +44,7 @@ export function createApp(store: Store, config: AppConfig) {
         const eventId = header(req, 'x-event-id') ?? (typeof bodyId === 'string' || typeof bodyId === 'number' ? String(bodyId) : null)
           ?? createHash('sha256').update(raw).digest('hex');
 
-        const eventType = eventTypeOf(header(req, 'x-event-type'), payload);
+        const eventType = eventTypeOf(payload);
         const targets = routeEvent(source.targets, eventType);
         const queued = store.enqueue(second, eventId, raw, targets);
         // Senders retry on non-2xx, so a duplicate is still a success for them.

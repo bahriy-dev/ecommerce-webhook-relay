@@ -5,6 +5,7 @@
  *   { "url": "https://wms.example.com/hooks", "events": ["order.paid", "stock.*"] }
  *
  * Patterns are exact event types or a prefix ending in ".*". A lone "*" matches everything.
+ * An empty list (`"events": []`) subscribes to nothing, which pauses a target without removing it.
  */
 export type TargetConfig = string | { url: string; events?: string[] };
 
@@ -23,15 +24,18 @@ export function routeEvent(targets: TargetConfig[], eventType: string | null): s
   const urls: string[] = [];
   for (const target of targets) {
     if (typeof target === 'string') urls.push(target);
-    else if (!target.events?.length) urls.push(target.url);
+    else if (target.events === undefined) urls.push(target.url);
     else if (eventType && target.events.some((p) => matchesEvent(p, eventType))) urls.push(target.url);
   }
   return [...new Set(urls)];
 }
 
-/** Reads the event type from the X-Event-Type header or the payload's `type` / `event` field. */
-export function eventTypeOf(header: string | undefined, payload: unknown): string | null {
-  if (header) return header;
+/**
+ * Reads the event type from the payload's `type` / `event` field.
+ * Only the body is covered by the HMAC signature, so an unsigned header such as X-Event-Type
+ * is never used: a replayed request could otherwise be re-routed by changing it.
+ */
+export function eventTypeOf(payload: unknown): string | null {
   const body = payload as { type?: unknown; event?: unknown } | null;
   if (typeof body?.type === 'string') return body.type;
   if (typeof body?.event === 'string') return body.event;

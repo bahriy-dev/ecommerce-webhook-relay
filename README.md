@@ -74,8 +74,9 @@ with `events` receives only matching types. Patterns are exact (`order.paid`) or
 }
 ```
 
-The event type comes from the `X-Event-Type` header, or the payload's `type` / `event` field.
-Events without a type only go to unfiltered targets.
+The event type comes from the payload's `type` / `event` field. Only the body is signed, so headers such as
+`X-Event-Type` are ignored: otherwise a replayed request could be re-routed by changing them.
+Events without a type only go to unfiltered targets, and `"events": []` pauses a target.
 
 ## API
 
