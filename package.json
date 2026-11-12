@@ -1,10 +1,13 @@
 {
-  "name": "webhook-relay",
+  "name": "ecommerce-webhook-relay",
   "version": "1.0.0",
   "description": "Reliable webhook relay for e-commerce events: HMAC signature verification, de-duplication, fan-out, retries with exponential backoff, dead-letter queue and replay. Zero dependencies, Node.js + SQLite.",
   "type": "module",
   "license": "MIT",
   "author": "Bahri YILMAZ (https://bahriyilmaz.dev)",
+  "repository": { "type": "git", "url": "git+https://github.com/bahriy-dev/ecommerce-webhook-relay.git" },
+  "homepage": "https://github.com/bahriy-dev/ecommerce-webhook-relay#readme",
+  "bugs": "https://github.com/bahriy-dev/ecommerce-webhook-relay/issues",
   "engines": { "node": ">=22.18" },
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning src/server.ts",
